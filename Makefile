@@ -1,11 +1,14 @@
+CC=gcc
+FC=gfortran
+
 all: test.exe
 
 test.o: test.c
-	gcc -c test.c
+	${CC} -c test.c
 
 test.exe: test.F90 \
           test.o
-	gfortran test.F90 test.o -o test.exe
+	${FC} test.F90 test.o -o test.exe
 
 clean:
 	rm test.o test.exe

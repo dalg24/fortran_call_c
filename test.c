@@ -17,10 +17,18 @@ void c_foo_(int *i, double *r, char *str1, char *str2, char *str3, int* retval, 
   *retval = 99;
 }
 
-/*
-void* XXX_create()
+void print_C(char *string) /* equivalent: char string[]  */
+{
+   printf("%s\n", string);
+}
+
+void* XXX_create(double const* vector, unsigned size, char const* options)
 {
   printf("XXX_create\n");
+  printf("vector=%p size=%d\n", vector, size);
+  for (unsigned i = 0; i < size; ++i)
+    printf("  %d %f\n", i, vector[i]);
+  printf("options=%s\n", options);
   return NULL;
 }
 
@@ -33,4 +41,3 @@ void XXX_delete(void* x)
 {
   printf("XXX_delete\n");
 }
-*/
