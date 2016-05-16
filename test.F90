@@ -9,7 +9,7 @@ program hello
     type(c_ptr) function xxx_create(vec, n, options) bind(C, name="XXX_create")
       use iso_c_binding, only: c_ptr, c_char, c_double, c_size_t
       implicit none
-      real(kind=c_double), intent(in) :: vec(:)
+      type(c_ptr), value      :: vec
       integer(kind=c_size_t), value, intent(in) :: n
       character(kind=c_char) :: options(*)
     end function
@@ -35,7 +35,7 @@ program hello
 
   integer :: ierror, rank, size
   type(c_ptr) :: x_ptr
-  real(c_double), allocatable :: vec(:)
+  real(c_double), allocatable,target :: vec(:)
   integer(c_size_t) :: n
   character(len=32) :: options
 
@@ -65,7 +65,7 @@ program hello
   vec(1) = 3.14
   vec(2) = 1.41
   options = '{ "name": "dummy", "age": 24 }'//char(0)
-  x_ptr = XXX_create(vec, n, options)
+  x_ptr = XXX_create(c_loc(vec), n, options)
   call XXX_apply(x_ptr)
   call XXX_delete(x_ptr)
   deallocate(vec)
