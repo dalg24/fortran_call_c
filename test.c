@@ -23,11 +23,16 @@ void print_C(char *string) /* equivalent: char string[]  */
    printf("%s\n", string);
 }
 
-void* XXX_create(double const* vector, unsigned size, char const* options)
+void* XXX_create(MPI_Fint* fint, double const* vector, unsigned n, char const* options)
 {
+  MPI_Comm comm = MPI_Comm_f2c(*fint);
+  int rank, size;
+  MPI_Comm_rank(comm, &rank);
+  MPI_Comm_size(comm, &size);
+  printf("Hello world from process %d of %d\n", rank, size);
   printf("XXX_create\n");
-  printf("vector=%p size=%d\n", vector, size);
-  for (unsigned i = 0; i < size; ++i)
+  printf("vector=%p size=%d\n", vector, n);
+  for (unsigned i = 0; i < n; ++i)
     printf("  %d %f\n", i, vector[i]);
   printf("options=%s\n", options);
   return NULL;

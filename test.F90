@@ -6,9 +6,10 @@ program hello
       use iso_c_binding, only: c_char
       character(kind=c_char) :: string(*)
     end subroutine
-    type(c_ptr) function xxx_create(vec, n, options) bind(C, name="XXX_create")
+    type(c_ptr) function xxx_create(comm, vec, n, options) bind(C, name="XXX_create")
       use iso_c_binding, only: c_ptr, c_char, c_double, c_size_t
       implicit none
+      integer :: comm
       type(c_ptr), value      :: vec
       integer(kind=c_size_t), value, intent(in) :: n
       character(kind=c_char) :: options(*)
@@ -33,9 +34,9 @@ program hello
   character(len=64)  :: str2
   character(len=32)  :: str3
 
-  integer :: ierror, rank, size
+  integer :: ierr, comm_rank, comm_size
   type(c_ptr) :: x_ptr
-  real(c_double), allocatable,target :: vec(:)
+  real(c_double), allocatable, target :: vec(:)
   integer(c_size_t) :: n
   character(len=32) :: options
 
@@ -56,22 +57,19 @@ program hello
 
   call print_c(C_CHAR_"Hello World"//C_NULL_CHAR)
 
-  call MPI_INIT(ierror)
-  call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
-  call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierror)
-  write(*, 100) rank, size
+  call MPI_INIT(ierr)
+  call MPI_COMM_SIZE(MPI_COMM_WORLD, comm_size, ierr)
+  call MPI_COMM_RANK(MPI_COMM_WORLD, comm_rank, ierr)
   n = 2
   allocate(vec(n))
   vec(1) = 3.14
   vec(2) = 1.41
-  options = '{ "name": "dummy", "age": 24 }'//char(0)
-  x_ptr = XXX_create(c_loc(vec), n, options)
+  options = '{ "name": "dummy", "age": 24 }'//c_null_char
+  x_ptr = XXX_create(MPI_COMM_WORLD, c_loc(vec), n, options)
   call XXX_apply(x_ptr)
   call XXX_delete(x_ptr)
   deallocate(vec)
-  call MPI_FINALIZE(ierror)
-
-  100 format('Hello World! I am rank ', I1, ' of size ', I1)
+  call MPI_FINALIZE(ierr)
 
 end program
 
