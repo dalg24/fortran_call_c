@@ -1,5 +1,5 @@
-CC=gcc
-FC=gfortran
+CC=mpicc
+FC=mpifort
 
 all: test.exe
 

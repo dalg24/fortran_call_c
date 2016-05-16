@@ -1,5 +1,3 @@
-!include 'mpif.h'
-
 program hello
   use iso_c_binding
   implicit none
@@ -27,11 +25,15 @@ program hello
     end subroutine
   end interface
 
+  include 'mpif.h'
+
   integer       :: i, retval
   real(kind=8)  :: r
   character(len=128) :: str1
   character(len=64)  :: str2
   character(len=32)  :: str3
+
+  integer :: ierror, rank, size
   type(c_ptr) :: x_ptr
   real(c_double), allocatable :: vec(:)
   integer(c_size_t) :: n
@@ -53,6 +55,11 @@ program hello
   print *, "In Fortran code .. Back from C function, received retval: ", retval
 
   call print_c(C_CHAR_"Hello World"//C_NULL_CHAR)
+
+  call MPI_INIT(ierror)
+  call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
+  call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierror)
+  write(*, 100) rank, size
   n = 2
   allocate(vec(n))
   vec(1) = 3.14
@@ -62,6 +69,9 @@ program hello
   call XXX_apply(x_ptr)
   call XXX_delete(x_ptr)
   deallocate(vec)
+  call MPI_FINALIZE(ierror)
+
+  100 format('Hello World! I am rank ', I1, ' of size ', I1)
 
 end program
 

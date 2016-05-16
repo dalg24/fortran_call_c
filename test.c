@@ -1,6 +1,7 @@
-#include "stdio.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <mpi.h>
 
 /*
  * The C interface to the Fortran function
