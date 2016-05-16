@@ -1,15 +1,17 @@
 program hello
   use iso_c_binding
   implicit none
+
+  enum, bind(C)
+    enumerator :: white=1, black=2
+  end enum
+
   interface
-    subroutine print_c(string) bind(C, name="print_C")
-      use iso_c_binding, only: c_char
-      character(kind=c_char) :: string(*)
-    end subroutine
-    type(c_ptr) function xxx_create(comm, vec, n, options) bind(C, name="XXX_create")
-      use iso_c_binding, only: c_ptr, c_char, c_double, c_size_t
+    type(c_ptr) function xxx_create(comm, vec, n, color, options) bind(C, name="XXX_create")
+      use iso_c_binding, only: c_ptr, c_char, c_double, c_size_t, c_int
       implicit none
       integer :: comm
+      integer(kind=c_int), value, intent(in) :: color
       type(c_ptr), value      :: vec
       integer(kind=c_size_t), value, intent(in) :: n
       character(kind=c_char) :: options(*)
@@ -28,34 +30,11 @@ program hello
 
   include 'mpif.h'
 
-  integer       :: i, retval
-  real(kind=8)  :: r
-  character(len=128) :: str1
-  character(len=64)  :: str2
-  character(len=32)  :: str3
-
   integer :: ierr, comm_rank, comm_size
   type(c_ptr) :: x_ptr
   real(c_double), allocatable, target :: vec(:)
   integer(c_size_t) :: n
   character(len=32) :: options
-
-  !! Init variables
-  !! retval will hold the value returned from the C function
-  i=10
-  retval = 0
-  r = 10.99
-  str1 = "Hello World"//char(0)  !! Null terminate the string in fortran. Dont forget to do this.
-  str2 = ""//char(0)             !! Empty string
-  str3 = "Howdy!!"               !! Lets try a non null-terminated string
-
-  !! Call the C function
-  call c_foo(i,r,str1,str2,str3,retval)
-
-  !! Print retval returned from C
-  print *, "In Fortran code .. Back from C function, received retval: ", retval
-
-  call print_c(C_CHAR_"Hello World"//C_NULL_CHAR)
 
   call MPI_INIT(ierr)
   call MPI_COMM_SIZE(MPI_COMM_WORLD, comm_size, ierr)
@@ -65,7 +44,7 @@ program hello
   vec(1) = 3.14
   vec(2) = 1.41
   options = '{ "name": "dummy", "age": 24 }'//c_null_char
-  x_ptr = XXX_create(MPI_COMM_WORLD, c_loc(vec), n, options)
+  x_ptr = XXX_create(MPI_COMM_WORLD, c_loc(vec), n, white, options)
   call XXX_apply(x_ptr)
   call XXX_delete(x_ptr)
   deallocate(vec)

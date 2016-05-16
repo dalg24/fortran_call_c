@@ -3,27 +3,9 @@
 #include <string.h>
 #include <mpi.h>
 
-/*
- * The C interface to the Fortran function
- * Notice the trailing underscore in the function name
- * All variables are passed as pointers
- * String lengths are passed implicitly by the compiler and not as pointers
- */
-void c_foo_(int *i, double *r, char *str1, char *str2, char *str3, int* retval, int str1_len, int str2_len, int str3_len) {
-  puts("In C code ..");
-  printf("i: %d, r: %f, str1: %s, str2: %s, str3: %s, len_str1: %d, len_str2: %d, len_str3: %d, strlen(str1): %d, strlen(str2): %d, strlen(str3): %d, retval: %d\n",
-          *i, *r, str1, str2, str3, str1_len, str2_len, str3_len, strlen(str1), strlen(str2), strlen(str3), *retval);
+typedef enum { white=1, black=2 } XXX_Color;
 
-  //Set return value to something
-  *retval = 99;
-}
-
-void print_C(char *string) /* equivalent: char string[]  */
-{
-   printf("%s\n", string);
-}
-
-void* XXX_create(MPI_Fint* fint, double const* vector, unsigned n, char const* options)
+void* XXX_create(MPI_Fint* fint, double const* vector, unsigned n, XXX_Color color, char const* options)
 {
   MPI_Comm comm = MPI_Comm_f2c(*fint);
   int rank, size;
@@ -34,6 +16,15 @@ void* XXX_create(MPI_Fint* fint, double const* vector, unsigned n, char const* o
   printf("vector=%p size=%d\n", vector, n);
   for (unsigned i = 0; i < n; ++i)
     printf("  %d %f\n", i, vector[i]);
+  if (color == white)
+    printf("color=white\n");
+  else if (color == black)
+    printf("color=black\n");
+  else
+  {
+    printf("invalid color!\n");
+    abort();
+  }
   printf("options=%s\n", options);
   return NULL;
 }
